@@ -1,0 +1,28 @@
+{
+  "name": "ru-d1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node . | pino-pretty",
+    "deploy:public": "node src/deploy/cmd-public.js",
+    "deploy:dev": "node src/deploy/cmd-dev.js",
+    "deploy:delete": "node src/deploy/cmd-del.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.9.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "figlet": "^1.7.0",
+    "luxon": "^3.5.0",
+    "mongoose": "^8.5.3",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2",
+    "rotating-file-stream": "^3.2.3"
+  }
+}
