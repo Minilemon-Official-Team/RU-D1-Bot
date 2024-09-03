@@ -32,7 +32,7 @@ const rest = new REST().setToken(TOKEN);
   try {
     logger.info(`Started refreshing ${commands.length} application (/) commands.`);
 
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+    const data = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
       body: commands,
     });
 
