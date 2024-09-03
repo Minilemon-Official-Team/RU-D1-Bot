@@ -54,7 +54,7 @@ module.exports = {
       return;
     }
 
-    if (!isAttendanceTime() && !isSaturday() && !isMonday()) {
+    if (!isAttendanceTime() && !isSaturday()) {
       return interaction.reply({
         embeds: [createAttendanceNotStartedEmbed()],
         ephemeral: true,
