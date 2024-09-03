@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node . | pino-pretty",
     "deploy:public": "node src/deploy/cmd-public.js",
-    "deploy:dev": "node src/deploy/cmd-dev.js",
-    "deploy:delete": "node src/deploy/cmd-del.js"
+    "deploy:prod": "node src/deploy/cmd-guild.js",
+    "deploy:del": "node src/deploy/cmd-del.js"
   },
   "keywords": [],
   "author": "",
