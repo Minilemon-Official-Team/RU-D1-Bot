@@ -19,7 +19,11 @@ const addAttendance = async ({ member, status, keterangan = null }) => {
   const endAbsen = new Date().setHours(9, 10, 0, 0);
   const now = new Date();
 
-  const telat = !(now >= startAbsen && now <= endAbsen);
+  let telat; 
+  
+  if (wajibKeterangan.includes(status)) {
+    telat = false;
+  } else telat = !(now >= startAbsen && now <= endAbsen);
 
   try {
     const startDate = new Date();
