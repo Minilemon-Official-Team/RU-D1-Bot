@@ -1,7 +1,7 @@
 const pointService = require('../services/point');
 const { ensureUserExists } = require('./user');
 
-const addPoint = async ({ member, type, points, reason = null, addedBy, correct = false }) => {
+const addPoint = async ({ member, type, point, reason = null, addedBy, correct = false }) => {
   const MAX_TOTAL_POINTS = 20;
   const userId = member.user.id;
 
@@ -12,12 +12,12 @@ const addPoint = async ({ member, type, points, reason = null, addedBy, correct 
 
   if (type === 'add') {
     const availablePoints = MAX_TOTAL_POINTS - (addPoints + minusPoints);
-    if (points > availablePoints && !correct) {
+    if (point > availablePoints && !correct) {
       throw new Error(`Poin yang diberikan melebihi batas maksimum.`);
     }
     return handleAddPoints({
       userId,
-      points: Math.min(points, availablePoints),
+      point: Math.min(point, availablePoints),
       reason,
       addedBy,
     });
@@ -34,19 +34,19 @@ const addPoint = async ({ member, type, points, reason = null, addedBy, correct 
 
     const result = await handleMinusPoints({
       userId,
-      points,
+      point,
       reason,
       addedBy,
     });
 
     if (!correct && addPoint !== 0) {
-      if (addPoints - points < 0) {
-        points = addPoints;
+      if (addPoints - point < 0) {
+        point = addPoints;
       }
 
       await handleAddPoints({
         userId,
-        points: -points,
+        point: -point,
         reason: `Pengurangan karena minus point: ${reason}`,
         addedBy,
       });
@@ -90,16 +90,16 @@ const clearPoint = async ({ user_id }) => {
   }
 };
 
-const correctPoint = async ({ member, type, points, reason, addedBy }) => {
+const correctPoint = async ({ member, type, point, reason, addedBy }) => {
   const userId = member.user.id;
   const { addPoints, minusPoints } = await pointService.getMonthlyPointsByUser(userId);
 
   if (type === 'add') {
-    if (addPoints + points < 0) {
+    if (addPoints + point < 0) {
       throw new Error(`Koreksi akan membuat add point menjadi negatif.`);
     }
   } else if (type === 'minus') {
-    if (minusPoints + points < 0) {
+    if (minusPoints + point < 0) {
       throw new Error(`Koreksi akan membuat minus point menjadi negatif.`);
     }
   } else {
@@ -109,7 +109,7 @@ const correctPoint = async ({ member, type, points, reason, addedBy }) => {
   return await addPoint({
     member,
     type,
-    points,
+    point,
     reason: `Koreksi ${type}: ${reason}`,
     addedBy,
     correct: true,

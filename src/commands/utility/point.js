@@ -192,7 +192,7 @@ module.exports = {
           await correctPoint({
             member: targetMember,
             type,
-            points: point,
+            point,
             reason,
             addedBy: interaction.member,
           });
@@ -212,7 +212,7 @@ module.exports = {
         const addedPoint = await addPoint({
           member: targetMember,
           type,
-          points: point,
+          point,
           reason,
           addedBy: interaction.member,
         });
