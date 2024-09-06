@@ -44,6 +44,10 @@ const addPoint = async ({ member, type, point, reason = null, addedBy, correct =
         point = addPoints;
       }
 
+      if (minusPoints + point >= MAX_TOTAL_POINTS) {
+        throw new Error(`Poin minus yang diberikan melebihi batas maksimum. Point yang tersedia adalah **${MAX_TOTAL_POINTS - minusPoints}**`);
+      }
+
       await handleAddPoints({
         userId,
         point: -point,
