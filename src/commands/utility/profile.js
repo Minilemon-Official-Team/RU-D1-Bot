@@ -81,12 +81,13 @@ module.exports = {
     };
 
     try {
+      await interaction.deferReply();
       const targetMember = userChoice
         ? interaction.guild.members.cache.get(userChoice.id)
         : interaction.guild.members.cache.get(user.id);
 
       if (userChoice && userChoice.bot) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder().setColor('Red').setDescription('User yang anda pilih adalah bot!'),
           ],
@@ -95,7 +96,7 @@ module.exports = {
       }
 
       if (!targetMember) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor('Red')
@@ -120,10 +121,10 @@ module.exports = {
         activeDiscord,
         thumbnail: targetMember.user.displayAvatarURL(),
       });
-      await interaction.reply({ embeds: [statisticEmbed] });
+      await interaction.editReply({ embeds: [statisticEmbed] });
     } catch (error) {
       logger.error(error, 'Error handling profile-stat command:');
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [
           new EmbedBuilder()
             .setColor('Red')

@@ -100,6 +100,8 @@ module.exports = {
    * @param {ChatInputCommandInteraction} interaction
    */
   async execute(interaction) {
+    await interaction.deferReply({ ephemeral: true });
+
     try {
       const admins = await getAllAdmin();
       const leadRoles = [
@@ -123,7 +125,7 @@ module.exports = {
       const userRoles = interaction.member.roles.cache.map((role) => role.id);
 
       if (!admins.includes(userId) && !userRoles.some((roleId) => leadRoles.includes(roleId))) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor('Red')
@@ -139,7 +141,7 @@ module.exports = {
       const targetMember = interaction.guild.members.cache.get(user.id);
 
       if (user.bot) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder().setColor('Red').setDescription('User yang anda pilih adalah bot!.'),
           ],
@@ -149,7 +151,7 @@ module.exports = {
 
       const highRole = targetMember.roles.highest.id;
       if (leadRoles.includes(highRole) && leadRoles.includes(interaction.member.roles.highest.id)) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor('Red')
@@ -160,7 +162,7 @@ module.exports = {
           ephemeral: true,
         });
       } else if (highestRoles.includes(highRole)) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor('Red')
@@ -220,7 +222,7 @@ module.exports = {
       }
 
       async function replyWithEmbed(type, userId = null, point = null) {
-        await interaction.reply({
+        await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor(0x758694)
@@ -237,7 +239,7 @@ module.exports = {
       }
     } catch (error) {
       logger.error(error, 'Error executing point command');
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [new EmbedBuilder().setColor('Red').setDescription(`${error.message}`)],
         ephemeral: true,
       });

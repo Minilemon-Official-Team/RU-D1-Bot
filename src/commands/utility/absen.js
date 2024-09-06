@@ -38,8 +38,10 @@ module.exports = {
       '1265523633820930188',
     ];
 
+    await interaction.deferReply({ ephemeral: true });
+
     if (!CHANNEL_ID_ABSEN.includes(interaction.channelId)) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [createErrorEmbed('Hanya bisa digunakan di text channel absen!')],
         ephemeral: true,
       });
@@ -47,7 +49,7 @@ module.exports = {
     }
 
     if (isMonday()) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [createErrorEmbed('Happy weekend!')],
         ephemeral: true,
       });
@@ -55,7 +57,7 @@ module.exports = {
     }
 
     if (!isAttendanceTime() && !isSaturday()) {
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [createAttendanceNotStartedEmbed()],
         ephemeral: true,
       });
@@ -73,7 +75,7 @@ module.exports = {
         const absenceData = absences.get(member.user.id);
 
         if (absenceData && absenceData.date === today) {
-          return interaction.reply({
+          return interaction.editReply({
             embeds: [createErrorEmbed('Anda sudah melakukan absen pada hari Sabtu ini.')],
             ephemeral: true,
           });
@@ -95,7 +97,7 @@ module.exports = {
           interaction.createdTimestamp,
         );
 
-        return interaction.reply({ embeds: [embedMessage] });
+        return interaction.editReply({ embeds: [embedMessage] });
       } else {
         const { attendance, timestamp } = await addAttendance({
           member,
@@ -112,9 +114,9 @@ module.exports = {
         );
       }
 
-      await interaction.reply({ embeds: [embedMessage] });
+      await interaction.editReply({ embeds: [embedMessage] });
     } catch (error) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [createErrorEmbed(error.message)],
         ephemeral: true,
       });

@@ -33,10 +33,12 @@ module.exports = {
     const commandName = interaction.options.getSubcommand();
     const user = interaction.options.getUser('user');
 
+    await interaction.deferReply({ ephemeral: true });
+
     if (interaction.user.bot) return;
 
     if (!admins.includes(interaction.user.id) && interaction.user.id !== AUTHOR_ID) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [
           new EmbedBuilder()
             .setColor('Red')
@@ -50,7 +52,7 @@ module.exports = {
     }
 
     if (user.bot) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [
           new EmbedBuilder().setColor('Red').setDescription('User yang anda pilih adalah bot!'),
         ],
@@ -62,7 +64,7 @@ module.exports = {
     try {
       if (commandName == 'add') {
         await addAdmin(user.id);
-        await interaction.reply({
+        await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor(0x6962ad)
@@ -72,7 +74,7 @@ module.exports = {
         });
       } else if (commandName == 'delete') {
         await deleteAdmin(user.id);
-        await interaction.reply({
+        await interaction.editReply({
           embeds: [
             new EmbedBuilder()
               .setColor(0x6962ad)
@@ -82,7 +84,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [new EmbedBuilder().setColor('Red').setDescription(error.message)],
         ephemeral: true,
       });
