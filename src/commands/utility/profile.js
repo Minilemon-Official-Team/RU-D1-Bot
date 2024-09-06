@@ -6,6 +6,7 @@ const {
 const { getMonthlyPointsByUser } = require('../../services/point');
 const { getActiveHours } = require('../../controller/voice-activity');
 const { ensureUserExists } = require('../../controller/user');
+const logger = require('../../utils/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
