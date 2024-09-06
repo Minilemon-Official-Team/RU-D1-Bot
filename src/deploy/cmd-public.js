@@ -30,13 +30,13 @@ const rest = new REST().setToken(TOKEN);
 
 (async () => {
   try {
-    logger.log(`Started refreshing ${commands.length} application (/) commands.`);
+    logger.info(`Started refreshing ${commands.length} application (/) commands.`);
 
     const data = await rest.put(Routes.applicationCommands(CLIENT_ID), {
       body: commands,
     });
 
-    logger.log(`Succesfully reloaded ${data.length} application (/) commands.`);
+    logger.info(`Succesfully reloaded ${data.length} application (/) commands.`);
   } catch (error) {
     console.error(error);
   }
