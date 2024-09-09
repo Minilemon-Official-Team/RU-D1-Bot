@@ -16,24 +16,26 @@ module.exports = {
    * @param {Client} client
    */
   async execute(oldState, newState, client) {
-    const isWithinActivityHours = () => {
-      const now = DateTime.now().setZone('Asia/Jakarta');
-
-      const start = now.set({ hour: 8, minute: 45 });
-      const end = now.set({ hour: 17, minute: 0 });
-
-      return now >= start && now <= end;
-    };
+    const now = DateTime.now().setZone('Asia/Jakarta');
+    const start = now.set({ hour: 8, minute: 45 });
+    const end = now.set({ hour: 17, minute: 0 });
 
     const handleVoiceStateUpdate = async (oldState, newState) => {
-      if (!isWithinActivityHours()) return;
       if (oldState.member?.user.bot && newState.member?.user.bot) return;
 
-      const now = new Date();
-      const currentHour = now.getHours() + now.getMinutes() / 60;
+      const getCurrentTime = () => {
+        const now = DateTime.now().setZone('Asia/Jakarta');
+        return now.hour + now.minute / 60;
+      };
 
       if (!oldState.channelId && newState.channelId) {
-        userJoinTimes.set(newState.member.id, currentHour);
+        const joinTime = Math.max(getCurrentTime(), start.hour + start.minute / 60);
+
+        if (joinTime >= end.hour + end.minute / 60) {
+          return;
+        }
+
+        userJoinTimes.set(newState.member.id, joinTime);
         logger.info(
           `[VOICE JOIN] User: ${newState.member.user.username} (ID: ${newState.member.user.id}) joined Voice Channel: ${newState.channel.name} (ID: ${newState.channel.id})`,
         );
@@ -41,19 +43,26 @@ module.exports = {
       }
 
       if (oldState.channelId && !newState.channelId) {
-        const leaveHour = currentHour;
+        const leaveTime = Math.min(getCurrentTime(), end.hour + end.minute / 60);
+        const joinTime = userJoinTimes.get(oldState.member.id);
+
         logger.info(
           `[VOICE LEAVE] User: ${oldState.member.user.username} (ID: ${oldState.member.user.id}) left Voice Channel: ${oldState.channel.name} (ID: ${oldState.channel.id})`,
         );
         await discordLogger.voiceLeft(client, oldState);
 
-        const joinHour = userJoinTimes.get(oldState.member.id);
-        if (joinHour !== undefined) {
-          const duration = leaveHour - joinHour;
-          try {
-            await addVoiceActivity(oldState.member, duration);
-          } catch (error) {
-            logger.error(error, 'Error adding voice activity');
+        if (joinTime !== undefined) {
+          let duration = leaveTime - joinTime;
+
+          if (duration > 0) {
+            if (duration > 8) {
+              duration = 8;
+            }
+            try {
+              await addVoiceActivity(oldState.member, duration);
+            } catch (error) {
+              logger.error(error, 'Error adding voice activity');
+            }
           }
           userJoinTimes.delete(oldState.member.id);
         } else {
@@ -62,6 +71,7 @@ module.exports = {
       }
     };
 
+    // Hanya eksekusi di guild yang sesuai
     if (oldState.guild.id !== GUILD_ID || newState.guild.id !== GUILD_ID) return;
 
     await handleVoiceStateUpdate(oldState, newState);
