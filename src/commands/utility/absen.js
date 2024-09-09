@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } = require('discord.js');
+const { DateTime } = require('luxon');
 const { addAttendance } = require('../../controller/attendance');
 
 const absences = new Map();
@@ -30,6 +31,8 @@ module.exports = {
    * @param {ChatInputCommandInteraction} interaction
    */
   async execute(interaction) {
+    await interaction.deferReply();
+
     const CHANNEL_ID_ABSEN = [
       '1265538112927567954',
       '1259797796626894888',
@@ -38,9 +41,10 @@ module.exports = {
       '1265523633820930188',
     ];
 
-    await interaction.deferReply({ ephemeral: true });
-
-    if (!CHANNEL_ID_ABSEN.includes(interaction.channelId)) {
+    if (
+      !CHANNEL_ID_ABSEN.includes(interaction.channelId) &&
+      !interaction.channelId.includes('1277831891042570329')
+    ) {
       await interaction.editReply({
         embeds: [createErrorEmbed('Hanya bisa digunakan di text channel absen!')],
         ephemeral: true,
@@ -75,26 +79,35 @@ module.exports = {
         const absenceData = absences.get(member.user.id);
 
         if (absenceData && absenceData.date === today) {
-          return interaction.editReply({
-            embeds: [createErrorEmbed('Anda sudah melakukan absen pada hari Sabtu ini.')],
-            ephemeral: true,
+          const sentMessage = await interaction.editReply({
+            embeds: [
+              createErrorEmbed(`<@${member.user.id}> Anda sudah melakukan absen pada hari ini.`),
+            ],
           });
+
+          setTimeout(() => {
+            sentMessage.delete();
+          }, 60000);
+          return;
         }
+
+        console.log({ absenceData });
 
         absences.set(member.user.id, {
           userId: member.user.id,
           status: commandName,
           keterangan,
-          timestamp: interaction.createdTimestamp,
+          timestamp: Math.floor(interaction.createdTimestamp / 1000),
           date: today,
         });
+
+        console.log({ absences });
 
         const embedMessage = createWeekendEmbed(
           member.user.id,
           commandName,
-          false,
           keterangan,
-          interaction.createdTimestamp,
+          Math.floor(interaction.createdTimestamp / 1000),
         );
 
         return interaction.editReply({ embeds: [embedMessage] });
@@ -116,17 +129,21 @@ module.exports = {
 
       await interaction.editReply({ embeds: [embedMessage] });
     } catch (error) {
-      await interaction.editReply({
+      const message = await interaction.editReply({
         embeds: [createErrorEmbed(error.message)],
         ephemeral: true,
       });
+
+      setTimeout(() => message.delete(), 60000);
     }
   },
 };
 
 function isAttendanceTime() {
-  const timeAttend = new Date().setHours(8, 45, 0, 0);
-  return new Date() >= timeAttend;
+  const now = DateTime.now().setZone('Asia/Jakarta');
+  const timeAttend = now.set({ hour: 8, minute: 45, second: 0, millisecond: 0 });
+
+  return now >= timeAttend;
 }
 
 function isSaturday() {
@@ -155,18 +172,25 @@ cleanupOldAbsences();
 setInterval(cleanupOldAbsences, 24 * 60 * 60 * 1000);
 
 function createAttendanceNotStartedEmbed() {
-  const timeAttend = new Date().setHours(8, 45, 0, 0);
+  const timeAttend = DateTime.now()
+    .setZone('Asia/Jakarta')
+    .set({ hour: 8, minute: 45, second: 0, millisecond: 0 });
+  const unixTimeAttend = Math.floor(timeAttend.toSeconds());
+
   return new EmbedBuilder()
     .setColor('Blurple')
-    .setDescription(`Absen dimulai dalam <t:${Math.floor(timeAttend / 1000)}:R>`);
+    .setDescription(`Absen dimulai dalam <t:${unixTimeAttend}:R>`);
 }
 
 function createWeekendEmbed(user_id, status, keterangan, timestamp) {
-  let message = `<a:success:1275324158984720394>\u2009 <@${user_id}> tercatat **${status}** pada waktu <t:${timestamp}:t>. Happy Weekend!`;
+  console.log({ user_id, status, keterangan, timestamp });
+  let message = `<a:success:1275324158984720394>\u2009 <@${user_id}> tercatat **${status}** pada waktu <t:${timestamp}:t>`;
 
   if (keterangan) {
-    message += ` Keterangan: **${keterangan}**`;
+    message += `. Keterangan: **${keterangan}**`;
   }
+
+  message += '. Happy weekend!';
 
   return new EmbedBuilder().setColor('Blurple').setDescription(message);
 }

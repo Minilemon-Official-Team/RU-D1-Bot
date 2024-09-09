@@ -7,13 +7,6 @@ const discordLogger = require('../utils/discordLogger');
 
 const userJoinTimes = new Map();
 
-function isWeekend() {
-  const today = new Date();
-  const day = today.getDay();
-
-  return day === 0 || day === 6;
-}
-
 module.exports = {
   name: Events.VoiceStateUpdate,
 
@@ -23,10 +16,9 @@ module.exports = {
    * @param {Client} client
    */
   async execute(oldState, newState, client) {
-    if (isWeekend()) return;
-
     const isWithinActivityHours = () => {
-      const now = DateTime.local();
+      const now = DateTime.now().setZone('Asia/Jakarta');
+
       const start = now.set({ hour: 8, minute: 45 });
       const end = now.set({ hour: 17, minute: 0 });
 

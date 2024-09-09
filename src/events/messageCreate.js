@@ -13,8 +13,9 @@ module.exports = {
     if (message.author.bot || message.guild.id !== GUILD_ID) return;
 
     if (
-      message.content.toLowerCase().includes('#absen-pagi') ||
-      message.content.toLowerCase().includes('#absen hadir')
+      message.content.toLowerCase().startsWith('#absen-pagi') ||
+      message.content.toLowerCase().startsWith('#absen-hadir') ||
+      message.content.toLowerCase().startsWith('#absen hadir')
     ) {
       const command = message.client.prefixCommands.get('absen');
       if (!command) return;

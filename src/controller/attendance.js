@@ -15,12 +15,16 @@ const addAttendance = async ({ member, status, keterangan = null }) => {
     throw new Error(`Gagal absen: \`keterangan ${status} wajib di isi\``);
   }
 
-  const startAbsen = new Date().setHours(8, 45, 0, 0);
-  const endAbsen = new Date().setHours(9, 10, 0, 0);
-  const now = new Date();
+  const startAbsen = DateTime.now()
+    .setZone('Asia/Jakarta')
+    .set({ hour: 8, minute: 45, second: 0, millisecond: 0 });
+  const endAbsen = DateTime.now()
+    .setZone('Asia/Jakarta')
+    .set({ hour: 9, minute: 10, second: 0, millisecond: 0 });
+  const now = DateTime.now().setZone('Asia/Jakarta');
 
-  let telat; 
-  
+  let telat;
+
   if (wajibKeterangan.includes(status)) {
     telat = false;
   } else telat = !(now >= startAbsen && now <= endAbsen);
@@ -41,7 +45,7 @@ const addAttendance = async ({ member, status, keterangan = null }) => {
     if (existingAttendance.length > 0) {
       const timestamp = Math.floor(new Date(existingAttendance[0].date).getTime() / 1000);
       throw new Error(
-        `Anda sudah tercatat **${existingAttendance[0].status}** hari ini pada jam <t:${timestamp}:t>. Terima kasih.`,
+        `<@${user_id}> Anda sudah tercatat **${existingAttendance[0].status}** hari ini pada jam <t:${timestamp}:t>. Terima kasih.`,
       );
     }
 

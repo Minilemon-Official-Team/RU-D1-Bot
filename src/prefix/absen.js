@@ -1,4 +1,5 @@
 const { Message, EmbedBuilder } = require('discord.js');
+const { DateTime } = require('luxon');
 const { addAttendance } = require('../controller/attendance');
 
 const absences = new Map();
@@ -18,7 +19,7 @@ module.exports = {
       '1265523633820930188',
     ];
 
-    if (!CHANNEL_ID_ABSEN.includes(message.channelId)) {
+    if (!CHANNEL_ID_ABSEN.includes(message.channelId) && !message.channelId.includes('1277831891042570329')) {
       await message.delete();
       const sentMessage = await message.channel.send({
         embeds: [
@@ -61,7 +62,7 @@ module.exports = {
     const today = new Date().toDateString();
 
     try {
-      if (isSaturday()) {
+      if (true) {
         const absenceData = absences.get(user_id);
 
         if (absenceData && absenceData.date === today) {
@@ -69,7 +70,7 @@ module.exports = {
             embeds: [
               new EmbedBuilder()
                 .setColor('Red')
-                .setDescription('Anda sudah melakukan absen pada hari Sabtu ini.'),
+                .setDescription(`<@${user_id}> Anda sudah melakukan absen pada hari ini.`),
             ],
           });
           setTimeout(() => {
@@ -89,7 +90,7 @@ module.exports = {
         const embedMessage = new EmbedBuilder()
           .setColor('Blurple')
           .setDescription(
-            `<a:success:1275324158984720394>\u2009 <@${user_id}> tercatat **hadir** pada hari Sabtu ini. Happy Weekend!`,
+            `<a:success:1275324158984720394>\u2009 <@${user_id}> tercatat **hadir** pada hari ini. Happy weekend!`,
           );
 
         await message.channel.send({ embeds: [embedMessage] });
@@ -112,7 +113,7 @@ module.exports = {
       }
     } catch (error) {
       const embed = new EmbedBuilder().setColor('Red').setDescription(`${error.message}`);
-      const sentMessage = await message.reply({ embeds: [embed] });
+      const sentMessage = await message.channel.send({ embeds: [embed] });
       setTimeout(() => {
         sentMessage.delete().catch(console.error);
       }, 60000);
@@ -123,8 +124,10 @@ module.exports = {
 };
 
 function isAttendanceTime() {
-  const timeAttend = new Date().setHours(8, 45, 0, 0);
-  return new Date() >= timeAttend;
+  const now = DateTime.now().setZone('Asia/Jakarta');
+  const timeAttend = now.set({ hour: 8, minute: 45, second: 0, millisecond: 0 });
+
+  return now >= timeAttend;
 }
 
 function isSaturday() {
@@ -140,10 +143,14 @@ function isMonday() {
 }
 
 function createAttendanceNotStartedEmbed() {
-  const timeAttend = new Date().setHours(8, 45, 0, 0);
+  const timeAttend = DateTime.now()
+    .setZone('Asia/Jakarta')
+    .set({ hour: 8, minute: 45, second: 0, millisecond: 0 });
+  const unixTimeAttend = Math.floor(timeAttend.toSeconds());
+
   return new EmbedBuilder()
     .setColor('Blurple')
-    .setDescription(`Absen dimulai dalam <t:${Math.floor(timeAttend / 1000)}:R>`);
+    .setDescription(`Absen dimulai dalam <t:${unixTimeAttend}:R>`);
 }
 
 function cleanupOldAbsences() {
