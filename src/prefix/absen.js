@@ -19,7 +19,10 @@ module.exports = {
       '1265523633820930188',
     ];
 
-    if (!CHANNEL_ID_ABSEN.includes(message.channelId) && !message.channelId.includes('1277831891042570329')) {
+    if (
+      !CHANNEL_ID_ABSEN.includes(message.channelId) &&
+      !message.channelId.includes('1277831891042570329')
+    ) {
       await message.delete();
       const sentMessage = await message.channel.send({
         embeds: [
@@ -62,7 +65,7 @@ module.exports = {
     const today = new Date().toDateString();
 
     try {
-      if (true) {
+      if (isSaturday()) {
         const absenceData = absences.get(user_id);
 
         if (absenceData && absenceData.date === today) {
