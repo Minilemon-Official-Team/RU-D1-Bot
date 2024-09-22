@@ -5,6 +5,7 @@ const { addAttendance } = require('../../controller/attendance');
 const absences = new Map();
 
 module.exports = {
+  cooldown: 60,
   data: new SlashCommandBuilder()
     .setName('absen')
     .setDescription('Kehadiran')
@@ -52,19 +53,28 @@ module.exports = {
       return;
     }
 
-    if (isMonday()) {
-      await interaction.editReply({
-        embeds: [createErrorEmbed('Happy weekend!')],
+    if (isSunday()) {
+      const sentMessage = await interaction.editReply({
+        embeds: [createErrorEmbed(`Happy weekend! <@${interaction.user.id}>`)],
         ephemeral: true,
       });
+
+      setTimeout(() => {
+        sentMessage.delete();
+      }, 30000);
       return;
     }
 
     if (!isAttendanceTime() && !isSaturday()) {
-      return interaction.editReply({
+      const sentMessage = await interaction.editReply({
         embeds: [createAttendanceNotStartedEmbed()],
         ephemeral: true,
       });
+
+      setTimeout(() => {
+        sentMessage.delete();
+      }, 30000);
+      return;
     }
 
     const commandName = interaction.options.getSubcommand();
@@ -91,8 +101,6 @@ module.exports = {
           return;
         }
 
-        console.log({ absenceData });
-
         absences.set(member.user.id, {
           userId: member.user.id,
           status: commandName,
@@ -100,8 +108,6 @@ module.exports = {
           timestamp: Math.floor(interaction.createdTimestamp / 1000),
           date: today,
         });
-
-        console.log({ absences });
 
         const embedMessage = createWeekendEmbed(
           member.user.id,
@@ -147,15 +153,13 @@ function isAttendanceTime() {
 }
 
 function isSaturday() {
-  const today = new Date();
-  const day = today.getDay();
-  return day === 6;
+  const today = DateTime.now().setZone('Asia/Jakarta').weekday;
+  return today === 6;
 }
 
-function isMonday() {
-  const today = new Date();
-  const day = today.getDay();
-  return day === 0;
+function isSunday() {
+  const today = DateTime.now().setZone('Asia/Jakarta').weekday;
+  return today === 7;
 }
 
 function cleanupOldAbsences() {
@@ -183,7 +187,6 @@ function createAttendanceNotStartedEmbed() {
 }
 
 function createWeekendEmbed(user_id, status, keterangan, timestamp) {
-  console.log({ user_id, status, keterangan, timestamp });
   let message = `<a:success:1275324158984720394>\u2009 <@${user_id}> tercatat **${status}** pada waktu <t:${timestamp}:t>`;
 
   if (keterangan) {

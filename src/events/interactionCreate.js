@@ -1,4 +1,4 @@
-const { Events, BaseInteraction, Client } = require('discord.js');
+const { Events, BaseInteraction, Client, Collection, EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -19,6 +19,38 @@ module.exports = {
         logger.warn(`No command matching ${interaction.commandName} was found.`);
         return;
       }
+
+      const { cooldowns } = interaction.client;
+
+      if (!cooldowns.has(command.data.name)) {
+        cooldowns.set(command.data.name, new Collection());
+      }
+
+      const now = Date.now();
+      const timestamps = cooldowns.get(command.data.name);
+      const defaultCooldownDuration = 3;
+      const cooldownAmount = (command.cooldown ?? defaultCooldownDuration) * 1_000;
+
+      if (timestamps.has(interaction.user.id)) {
+        const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
+
+        if (now < expirationTime) {
+          const expiredTimestamp = Math.round(expirationTime / 1_000);
+          return interaction.reply({
+            embeds: [
+              new EmbedBuilder()
+                .setColor(0xc1cf02)
+                .setDescription(
+                  `Kamu dalam cooldown untuk command \`${command.data.name}\`. Kamu dapat menggunakan command <t:${expiredTimestamp}:R>.`,
+                ),
+            ],
+            ephemeral: true,
+          });
+        }
+      }
+
+      timestamps.set(interaction.user.id, now);
+      setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
       try {
         await command.execute(interaction, client);

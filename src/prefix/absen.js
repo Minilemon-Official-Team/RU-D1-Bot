@@ -23,7 +23,6 @@ module.exports = {
       !CHANNEL_ID_ABSEN.includes(message.channelId) &&
       !message.channelId.includes('1277831891042570329')
     ) {
-      await message.delete();
       const sentMessage = await message.channel.send({
         embeds: [
           new EmbedBuilder()
@@ -31,18 +30,19 @@ module.exports = {
             .setDescription(`<@${message.author.id}> Hanya bisa digunakan di text channel absen!`),
         ],
       });
+      await message.delete();
 
       setTimeout(() => {
         sentMessage.delete();
-      }, 60000);
+      }, 20000);
       return;
     }
 
-    if (isMonday()) {
-      await message.delete();
+    if (isSunday()) {
       const sentMessage = await message.reply({
         embeds: [new EmbedBuilder().setColor('Red').setDescription('Happy weekend!')],
       });
+      await message.delete();
       setTimeout(() => {
         sentMessage.delete();
       }, 60000);
@@ -134,15 +134,13 @@ function isAttendanceTime() {
 }
 
 function isSaturday() {
-  const today = new Date();
-  const day = today.getDay();
-  return day === 6;
+  const today = DateTime.now().setZone('Asia/Jakarta').weekday;
+  return today === 6;
 }
 
-function isMonday() {
-  const today = new Date();
-  const day = today.getDay();
-  return day === 0;
+function isSunday() {
+  const today = DateTime.now().setZone('Asia/Jakarta').weekday;
+  return today === 7;
 }
 
 function createAttendanceNotStartedEmbed() {

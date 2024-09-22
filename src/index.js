@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
 const client = new Client({
   intents: [
@@ -10,6 +10,8 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
   ],
 });
+
+client.cooldowns = new Collection();
 
 require('./handlers/commandHandler')(client);
 require('./handlers/buttonHandler')(client);
