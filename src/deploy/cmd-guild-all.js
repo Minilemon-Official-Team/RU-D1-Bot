@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { TOKEN, CLIENT_ID, GUILD_ID } = require('../config/config');
+const { TOKEN, GUILD_ID, CLIENT_ID } = require('../config/config');
 const { REST, Routes } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -30,19 +30,22 @@ const rest = new REST().setToken(TOKEN);
 
 (async () => {
   try {
-    rest
-      .put(Routes.applicationCommands(CLIENT_ID), { body: [] })
-      .then(() => logger.info('Successfully deleted all application commands.'));
-    rest
-      .put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: [] })
-      .then(() => logger.info('Successfully deleted all guild minilemon commands.'));
-    rest
-      .put(Routes.applicationGuildCommands(CLIENT_ID, '706816899039625247'), { body: [] })
-      .then(() => logger.info('Successfully deleted all guild btp commands.'));
-    rest
-      .put(Routes.applicationGuildCommands(CLIENT_ID, '850259481673859132'), { body: [] })
-      .then(() => logger.info('Successfully deleted all guild s-art commands.'));
+    logger.info(`Started refreshing ${commands.length} application (/) commands.`);
+
+    const data = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+      body: commands,
+    });
+
+    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, '706816899039625247'), {
+      body: commands,
+    });
+
+    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, '850259481673859132'), {
+      body: commands,
+    });
+
+    logger.info(`Succesfully reloaded ${data.length} application (/) commands.`);
   } catch (error) {
-    logger.error(error);
+    console.error(error);
   }
 })();
