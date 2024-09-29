@@ -13,8 +13,20 @@ module.exports = {
   async execute(client) {
     connectDB();
     const guild = client.guilds.cache.get(GUILD_ID);
+
     if (guild) {
-      client.user.setActivity({ name: guild.name, type: ActivityType.Watching });
+      const activities = [
+        { name: guild.name, type: ActivityType.Watching },
+        { name: '/help', type: ActivityType.Watching },
+        { name: `${guild.memberCount} members!`, type: ActivityType.Watching },
+      ];
+
+      let index = 0;
+
+      setInterval(() => {
+        client.user.setActivity(activities[index]);
+        index = (index + 1) % activities.length;
+      }, 60000);
     }
 
     logger.info(`Ready! Logged in as ${client.user.tag}`);
